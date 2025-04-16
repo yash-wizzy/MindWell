@@ -14,7 +14,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 model = DepressionModel()
 model.apply(weights_init)
-model.load_state_dict(torch.load("model/depression_model.pth", map_location=torch.device("cpu")))
+model.load_state_dict(torch.load("depression_model.pth", map_location=torch.device("cpu")))
 model.eval()
 
 @app.route('/', methods=['GET', 'POST'])
