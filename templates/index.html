@@ -66,20 +66,31 @@
         const form = document.getElementById('predictForm');
         const resultBox = document.getElementById('resultBox');
 
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // prevent full page reload
 
             const formData = new FormData(form);
-            const response = await fetch("/", {
-                method: "POST",
+
+            fetch('/', {
+                method: 'POST',
                 body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const score = data.depression_score.toFixed(3);
+                resultBox.style.display = 'block';
+                resultBox.innerHTML = `<strong>Predicted Depression Score:</strong> ${score}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultBox.style.display = 'block';
+                resultBox.innerHTML = `<strong>Error:</strong> Failed to get prediction.`;
             });
-
-            const data = await response.json();
-            const score = data.depression_score.toFixed(3);
-
-            resultBox.style.display = 'block';
-            resultBox.innerHTML = `<strong>Predicted Depression Score:</strong> ${score}`;
         });
     </script>
 </body>
