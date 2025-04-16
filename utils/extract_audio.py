@@ -1,23 +1,15 @@
-import os
-import librosa
+import subprocess
 import numpy as np
-import tempfile
-import moviepy.editor as mp
+import librosa
 
-def extract_mfcc_from_video(video_path, sr=22050, n_mfcc=13):
-    
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio:
-        temp_audio_path = temp_audio.name
-   
-    video = mp.VideoFileClip(video_path)
-    video.audio.write_audiofile(temp_audio_path, logger=None)
-    video.reader.close()
-    video.audio.reader.close_proc()
-   
-    y, _ = librosa.load(temp_audio_path, sr=sr)
+def extract_audio_from_video(video_path, output_audio_path):
+    """Extract audio track from video using ffmpeg"""
+    command = f"ffmpeg -y -i {video_path} -ac 1 -ar 16000 {output_audio_path}"
+    subprocess.run(command, shell=True, check=True, 
+                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def extract_mfcc(audio_path, n_mfcc=39):
+    """Extract MFCC features from audio file"""
+    y, sr = librosa.load(audio_path, sr=16000)
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc)
-   
-    os.remove(temp_audio_path)
-
-    return mfcc.T
-
+    return np.mean(mfcc.T, axis=0)
