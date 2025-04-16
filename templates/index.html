@@ -86,7 +86,7 @@
         .custom-file-upload {
             border: 2px dashed #ccc;
             display: inline-block;
-            padding: 2rem 1rem;
+            padding: 3rem 1rem;
             cursor: pointer;
             width: 100%;
             text-align: center;
@@ -97,22 +97,6 @@
         .custom-file-upload:hover {
             border-color: var(--accent);
             background-color: rgba(76, 201, 240, 0.05);
-        }
-        
-        textarea {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #eee;
-            border-radius: 8px;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 120px;
-            transition: border 0.3s;
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent);
         }
         
         .btn {
@@ -194,10 +178,12 @@
             margin: 0.5rem 0;
         }
         
-        .interpretation {
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #666;
+        .transcription {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
         }
         
         footer {
@@ -223,45 +209,45 @@
     <div class="container">
         <header>
             <h1>MindWell</h1>
-            <p class="subtitle">MindWell - Mental Health Analysis</p>
+            <p class="subtitle">AI-powered Mental Health Analysis from Video</p>
         </header>
         
         <div class="card">
             <form id="predictionForm" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="video">Upload Video</label>
+                    <label for="video">Upload Video with Speech</label>
                     <label for="video" class="custom-file-upload">
                         <i class="fas fa-video" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
                         <p>Click to upload video file</p>
-                        <small>Supports MP4, MOV, AVI formats</small>
+                        <small>We'll analyze both facial expressions and spoken words</small>
                     </label>
                     <input type="file" id="video" name="video" accept="video/*" required>
                 </div>
                 
-                <div class="form-group">
-                    <label for="text">Describe Your Feelings</label>
-                    <textarea id="text" name="text" placeholder="How have you been feeling lately? What's on your mind?" required></textarea>
-                </div>
-                
                 <button type="submit" class="btn">
-                    <i class="fas fa-brain"></i> Analyze
+                    <i class="fas fa-brain"></i> Analyze Video
                 </button>
             </form>
         </div>
         
         <div id="loading">
             <div class="spinner"></div>
-            <p style="margin-top: 1rem;">Analyzing your inputs...</p>
+            <p style="margin-top: 1rem;">Analyzing video content...</p>
         </div>
         
         <div id="result">
-            <h3>Your Depression Score</h3>
+            <h3>Analysis Results</h3>
             <div class="result-card">
                 <div class="score" id="score">0.0000</div>
                 <p>Normalised PHQ-8 Scale (0-1)</p>
-                <p class="interpretation">
-                    Lower scores indicate better mental health. 
-                    <br>This is not a clinical diagnosis - consult a professional for medical advice.
+                
+                <div class="transcription">
+                    <h4>Transcribed Speech:</h4>
+                    <p id="transcribedText">No speech detected</p>
+                </div>
+                
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                    This is not a clinical diagnosis - consult a professional for medical advice.
                 </p>
             </div>
         </div>
@@ -275,7 +261,7 @@
         document.getElementById("predictionForm").addEventListener("submit", async function(event) {
             event.preventDefault();
             
-            
+            // Show loading, hide result
             document.getElementById("loading").style.display = "block";
             document.getElementById("result").style.display = "none";
             
@@ -288,22 +274,25 @@
                     body: formData
                 });
                 
-                if (!response.ok) throw new Error("Network response was not ok");
+                if (!response.ok) throw new Error("Analysis failed");
                 
                 const data = await response.json();
                 
-                
+                // Display results
                 document.getElementById("score").textContent = data.depression_score.toFixed(4);
+                document.getElementById("transcribedText").textContent = 
+                    data.transcribed_text || "No speech could be transcribed";
                 document.getElementById("result").style.display = "block";
                 
             } catch (error) {
-                alert("An error occurred. Please try again.");
+                alert("Error analyzing video. Please try again.");
                 console.error("Error:", error);
             } finally {
                 document.getElementById("loading").style.display = "none";
             }
-        });        
+        });
         
+        // Show filename when video is selected
         document.getElementById("video").addEventListener("change", function() {
             const fileName = this.files[0]?.name || "No file selected";
             const uploadLabel = document.querySelector(".custom-file-upload p");
