@@ -34,11 +34,23 @@
         button:hover {
             background-color: #2980b9;
         }
+        .result {
+            max-width: 500px;
+            margin: 1.5rem auto;
+            text-align: center;
+            font-size: 1.2rem;
+            padding: 1rem;
+            background-color: #e8f8f5;
+            border: 1px solid #1abc9c;
+            border-radius: 8px;
+            color: #117a65;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <h2 style="text-align: center;">Multimodal Depression Predictor</h2>
-    <form action="/" method="post" enctype="multipart/form-data">
+    <form id="predictForm" enctype="multipart/form-data">
         <label for="video">Upload Video:</label>
         <input type="file" id="video" name="video" accept="video/*" required>
 
@@ -47,5 +59,28 @@
 
         <button type="submit">Predict</button>
     </form>
+
+    <div class="result" id="resultBox"></div>
+
+    <script>
+        const form = document.getElementById('predictForm');
+        const resultBox = document.getElementById('resultBox');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const response = await fetch("/", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            const score = data.depression_score.toFixed(3);
+
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = `<strong>Predicted Depression Score:</strong> ${score}`;
+        });
+    </script>
 </body>
 </html>
